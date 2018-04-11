@@ -20,12 +20,12 @@ class AdMail extends Ad
     /**
      * @var string
      */
-    public $funcFindOne = 'findOneByUsername';
+    protected $funcFindOne = 'findOneByUsername';
 
     /**
      * @var string
      */
-    public $keyFindOne = 'username';
+    protected $keyFindOne = 'username';
 
     /**
      * @param string $dn
@@ -48,6 +48,10 @@ class AdMail extends Ad
 
         if (!isset($attributes['mailboxServer'])) {
             $attributes['mailboxServer'] = $data['server']['name'];
+        }
+
+        if (!isset($attributes['language'])) {
+            $attributes['language'] = 'zh-CN,en-US';
         }
 
         $attributes['showInAddressBooks'] = [];

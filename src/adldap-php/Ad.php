@@ -21,28 +21,28 @@ class Ad
     /**
      * @var null
      */
-    public $logger = null;
+    protected $logger = null;
 
     /**
      * 数据类型
      *
      * @var LdapObjectType
      */
-    public $objectType = '';
+    protected $objectType = '';
 
     /**
      * 查询单个方法
      *
      * @var string
      */
-    public $findOneFunc = '';
+    protected $funcFindOne = '';
 
     /**
      * 查询单个主键
      *
      * @var string
      */
-    public $findOneKey = '';
+    protected $keyFindOne = '';
 
     /**
      * Ad constructor.
@@ -107,17 +107,17 @@ class Ad
      *
      * @param string $name
      * @param array $attributes
-     * @param string $findOneFunc
+     * @param string $funcFindOne
      *
      * @return bool
      */
-    public function change($name = '', $attributes = [], $findOneFunc = '')
+    public function change($name = '', $attributes = [], $funcFindOne = '')
     {
         try {
-            if (empty($findOneFunc)) {
-                $func = $this->findOneFunc;
+            if (empty($funcFindOne)) {
+                $func = $this->funcFindOne;
             } else {
-                $func = $findOneFunc;
+                $func = $funcFindOne;
             }
 
             $object = $this->ldap
@@ -129,6 +129,33 @@ class Ad
             }
 
             $this->ldap->persist($object);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logError($e->getMessage());
+
+            return false;
+        }
+    }
+
+    /**
+     * http://www.phpldaptools.com/tutorials/Using-the-LDAP-Manager/#moving-ldap-objects
+     *
+     * @param string $name
+     * @param string $newOu
+     *
+     * @return bool
+     */
+    public function changeOu($name = '', $newOu = '')
+    {
+        try {
+            $func = $this->funcFindOne;
+
+            $object = $this->ldap
+                ->getRepository($this->objectType)
+                ->$func($name);
+
+            $this->ldap->move($object, $newOu);
 
             return true;
         } catch (\Exception $e) {
@@ -151,15 +178,15 @@ class Ad
         try {
             if ($allAttributes) {
                 $object = $this->all(
-                    '**',
+                    '*',
                     [
-                        $this->findOneKey => $name
+                        $this->keyFindOne => $name
                     ]
                 );
 
                 $object = isset($object[0]) ? $object[0] : [];
             } else {
-                $func = $this->findOneFunc;
+                $func = $this->funcFindOne;
 
                 $object = $this->ldap
                     ->getRepository($this->objectType)
@@ -211,17 +238,17 @@ class Ad
      * http://www.phpldaptools.com/tutorials/Using-the-LDAP-Manager/#deleting-ldap-objects
      *
      * @param string $name
-     * @param string $findOneFunc
+     * @param string $funcFindOne
      *
      * @return bool
      */
-    public function delete($name = '', $findOneFunc = '')
+    public function delete($name = '', $funcFindOne = '')
     {
         try {
-            if (empty($findOneFunc)) {
-                $func = $this->findOneFunc;
+            if (empty($funcFindOne)) {
+                $func = $this->funcFindOne;
             } else {
-                $func = $findOneFunc;
+                $func = $funcFindOne;
             }
 
             $object = $this->ldap
@@ -249,7 +276,7 @@ class Ad
     /**
      * @param $message
      */
-    public function logError($message)
+    protected function logError($message)
     {
         $this->logger->logError($message);
     }
@@ -257,7 +284,7 @@ class Ad
     /**
      * @param $message
      */
-    public function logInfo($message)
+    protected function logInfo($message)
     {
         $this->logger->logInfo($message);
     }

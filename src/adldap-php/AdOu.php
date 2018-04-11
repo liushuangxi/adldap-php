@@ -15,15 +15,15 @@ class AdOu extends Ad
     /**
      * @var LdapObjectType
      */
-    public $objectType = LdapObjectType::OU;
+    protected $objectType = LdapObjectType::OU;
 
     /**
      * @var string
      */
-    public $funcFindOne = 'findOneByName';
+    protected $funcFindOne = 'findOneByName';
 
     /**
      * @var string
      */
-    public $keyFindOne = 'name';
+    protected $keyFindOne = 'name';
 }
