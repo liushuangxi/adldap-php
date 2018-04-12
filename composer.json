@@ -1,0 +1,26 @@
+{
+  "name": "liushuangxi/adldap-php",
+  "description": "adldap client for php",
+  "type": "library",
+  "keywords": [
+    "ad",
+    "ldap",
+    "php"
+  ],
+  "time": "2018-03-24",
+  "authors": [
+    {
+      "name": "柳双喜",
+      "email": "729021170@qq.com"
+    }
+  ],
+  "require": {
+    "ldaptools/ldaptools": "^0.25.2"
+  },
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Liushuangxi\\AdLdap\\": "src/adldap-php"
+    }
+  }
+}

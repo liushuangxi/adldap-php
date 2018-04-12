@@ -1,0 +1,11 @@
+general:
+    default_domain: "example.com"
+domains:
+    online:
+        domain_name: "example.com"
+        username: "admin"
+        password: "admin"
+        base_dn: "DC=example,DC=com"
+        servers: ["127.0.0.1"]
+        port: "636"
+        use_ssl: true
