@@ -28,8 +28,8 @@ class AdGroup extends Ad
     protected $keyFindOne = 'name';
 
     /**
-     * @param $ou
-     * @param $params
+     * @param string $ou
+     * @param array $params
      *  name
      *  emailAddress
      *
@@ -38,7 +38,7 @@ class AdGroup extends Ad
      *
      * @return bool
      */
-    public function createGroup($ou, $params)
+    public function createGroup($ou = '', $params = [])
     {
         if (empty($ou)
             || !isset($params['name'])
@@ -79,14 +79,14 @@ class AdGroup extends Ad
     }
 
     /**
-     * @param $groupName
-     * @param $usernames
+     * @param string $groupName
+     * @param array $usernames
      * @param string $type
      *  add /delete
      *
      * @return bool
      */
-    public function changeMembers($groupName, $usernames, $type = 'add')
+    public function changeMembers($groupName = '', $usernames = [], $type = 'add')
     {
         $group = $this->get($groupName, true);
         if (empty($group)) {
@@ -99,15 +99,23 @@ class AdGroup extends Ad
             $members = [];
         }
 
-        if ($type == 'add') {
-            //添加
-            $members = array_values(array_unique(array_merge($members, $usernames)));
-        } else if ($type == 'delete') {
-            //删除
-            $members = array_values(array_unique(array_diff($members, $usernames)));
-        } else {
-            return false;
+        switch ($type) {
+            case 'add':
+                $members = array_values(array_unique(array_merge($members, $usernames)));
+                break;
+            case 'delete':
+                $members = array_values(array_unique(array_diff($members, $usernames)));
+                break;
+            default:
+                return false;
         }
+
+        foreach ($members as $key => $member) {
+            if (empty($this->user()->get($member))) {
+                unset($members[$key]);
+            }
+        }
+        $members = array_values($members);
 
         $result = $this->change(
             $groupName, [

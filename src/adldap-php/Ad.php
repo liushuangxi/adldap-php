@@ -14,6 +14,11 @@ use LdapTools\Object\LdapObjectType;
 class Ad
 {
     /**
+     * @var array
+     */
+    public $config = [];
+
+    /**
      * @var LdapManager|null
      */
     public $ldap = null;
@@ -71,6 +76,8 @@ class Ad
         }
 
         $tmp = (new Configuration())->load($config['config_file']);
+
+        $this->config = $config;
 
         $this->ldap = new LdapManager($tmp);
         $this->logger = $config['logger'];
@@ -274,17 +281,34 @@ class Ad
     }
 
     /**
-     * @param $message
+     * @param $name
+     * @param $arguments
+     *
+     * @return AdUser|AdGroup|AdMail|AdOu|null
      */
-    protected function logError($message)
+    public function __call($name, $arguments)
+    {
+        $name = __NAMESPACE__ . "\Ad" . ucfirst(strtolower($name));
+
+        if (class_exists($name)) {
+            return new $name($this->config);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @param string $message
+     */
+    protected function logError($message = '')
     {
         $this->logger->logError($message);
     }
 
     /**
-     * @param $message
+     * @param string $message
      */
-    protected function logInfo($message)
+    protected function logInfo($message = '')
     {
         $this->logger->logInfo($message);
     }

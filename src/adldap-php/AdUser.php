@@ -28,31 +28,8 @@ class AdUser extends Ad
     protected $keyFindOne = 'username';
 
     /**
-     * @var AdGroup
-     */
-    protected $group = null;
-
-    /**
-     * @var AdMail
-     */
-    protected $mail = null;
-
-    /**
-     * AdUser constructor.
-     *
-     * @param $config
-     */
-    public function __construct($config)
-    {
-        parent::__construct($config);
-
-        $this->group = new AdGroup($config);
-        $this->mail = new AdMail($config);
-    }
-
-    /**
-     * @param $ou
-     * @param $params
+     * @param string $ou
+     * @param array $params
      *  username
      *  password
      *  emailAddress
@@ -66,7 +43,7 @@ class AdUser extends Ad
      *
      * @return bool
      */
-    public function createUser($ou, $params)
+    public function createUser($ou = '', $params = [])
     {
         if (empty($ou)
             || !isset($params['username'])
@@ -88,7 +65,7 @@ class AdUser extends Ad
             'enabled' => $params['enabled']
         ];
 
-        $result = $this->mail->createMail($ou, $mail);
+        $result = $this->mail()->createMail($ou, $mail);
 
         //修改账号
         $params['proxyAddresses'] = [
@@ -104,19 +81,14 @@ class AdUser extends Ad
 
     /**
      * @param string $username
-     * @param string $groupName
+     * @param array $groupNames
      * @param string $type
      *  add / delete
      *
      * @return bool
      */
-    public function changeGroup($username = '', $groupName = '', $type = 'add')
+    public function changeGroups($username = '', $groupNames = [], $type = 'add')
     {
-        $group = $this->group->get($groupName);
-        if (empty($group)) {
-            return false;
-        }
-
         $user = $this->get($username, true);
         if (empty($user)) {
             return false;
@@ -130,25 +102,21 @@ class AdUser extends Ad
 
         switch ($type) {
             case 'add':
-                $groups[] = $groupName;
-                $groups = array_values(array_unique($groups));
+                $groups = array_values(array_unique(array_merge($groups, $groupNames)));
                 break;
             case 'delete':
-                if (!empty($groups)) {
-                    $key = array_search($groupName, $groups);
-                    if ($key === false) {
-                        return true;
-                    }
-
-                    unset($groups[$key]);
-                    $groups = array_values($groups);
-                } else {
-                    return true;
-                }
+                $groups = array_values(array_unique(array_diff($groups, $groupNames)));
                 break;
-            case 'default':
+            default:
                 return false;
         }
+
+        foreach ($groups as $key => $group) {
+            if (empty($this->group()->get($group))) {
+                unset($groups[$key]);
+            }
+        }
+        $groups = array_values($groups);
 
         return $this->change($username, [
             'groups' => $groups
@@ -189,11 +157,11 @@ class AdUser extends Ad
     }
 
     /**
-     * @param $dns
+     * @param array $dns
      *
      * @return array
      */
-    public static function getUsernameFromDns($dns)
+    public static function getUsernameFromDns($dns = [])
     {
         return array_filter(
             array_map(
