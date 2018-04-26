@@ -111,16 +111,24 @@ class AdUser extends Ad
                 return false;
         }
 
-        foreach ($groups as $key => $group) {
-            if (empty($this->group()->get($group))) {
+        //检查邮件组
+        foreach ($groups as $key => $groupName) {
+            $group = $this->group()->getGroupByNameOrAccountName($groupName);
+
+            if (empty($group)) {
                 unset($groups[$key]);
+            } else {
+                $groups[$key] = $group['accountName'];
             }
         }
         $groups = array_values($groups);
 
-        return $this->change($username, [
-            'groups' => $groups
-        ]);
+        return $this->change(
+            $username,
+            [
+                'groups' => $groups
+            ]
+        );
     }
 
     /**
