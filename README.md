@@ -46,3 +46,5 @@ $config = [
 ## AdGroup
 * createGroup($ou = '', $params = [])
 * changeMembers($groupName = '', $usernames = [], $type = 'add')
+* getMembers($groupName = '', $page = 1, $pageSize = 500, $showDn = true)
+* getGroupByNameOrAccountName($name)
